@@ -1,0 +1,115 @@
+{
+  "name": "EXAMPLE_generic_mos_spectre",
+  "backend": "spectre_batch",
+  "cadence": {
+    "spectre_bin": "spectre",
+    "arch": "-64",
+    "extra_flags": [],
+    "results": {
+      "kind": "iris",
+      "layout": "<deck>.raw/<analysis>.dc"
+    }
+  },
+  "license": {
+    "policy": "user_declared",
+    "note": "上限=用户申报 max_concurrent_spectre；不探测 license 文件；为同事实务预留 reserve。",
+    "max_concurrent_spectre": 8,
+    "reserve_for_others": 2
+  },
+  "connection": {
+    "host": "YOUR_SIM_HOST",
+    "user": "YOUR_USER",
+    "password_env": "COLLECTOR_SSH_PWD",
+    "shell_wrap": "bash -lc"
+  },
+  "model_includes": [
+    {
+      "file": "/path/to/pdk/models/spe/generic_mos.lib",
+      "sections": [
+        "setup",
+        "tt"
+      ]
+    }
+  ],
+  "corner": "tt",
+  "temp_c": 27,
+  "tnom_c": 27,
+  "options": {
+    "reltol": "1e-3",
+    "vabstol": "1e-6",
+    "iabstol": "1e-12",
+    "gmin": "1e-12",
+    "maxwarns": "5"
+  },
+  "save_style": "colon",
+  "qc": {
+    "ft_source": "none",
+    "note": "I4 效力分轨：none=电荷交叉闸(需 --charge 存 q/C 族)、derived=写盘完整性(阈1e-6)、measured=真三方交叉；阈值覆写见 collector/qc.py QC_DEFAULTS"
+  },
+  "signals_dc": [
+    "ids",
+    "gm",
+    "gds",
+    "gmb",
+    "gmoverid",
+    "vth",
+    "vdsat"
+  ],
+  "signals_charge": [
+    "qg",
+    "qd",
+    "qs",
+    "qb",
+    "cgg",
+    "cgs",
+    "cgd",
+    "cds"
+  ],
+  "mos": {
+    "pins": "d g b s",
+    "instance": "M1 ({d} {g} {b} {s}) {model} w={W} l={L} m=1 nf=1",
+    "vds_source": "V1 ({d} {b}) vsource dc={vds_fixed}",
+    "vgs_source": "V2 ({g} {b}) vsource dc={vgs_start}",
+    "sweep": {
+      "dev": "V2",
+      "param": "dc"
+    }
+  },
+  "pairs": {
+    "pair_01": {
+      "n": {
+        "model": "nch_example",
+        "polarity": 1,
+        "domain": {
+          "L_range": [
+            "130n",
+            "10u"
+          ],
+          "W_range": [
+            "0.29u",
+            "50u"
+          ],
+          "vds_range": [
+            0.0,
+            3.3
+          ],
+          "vgs_range": [
+            0.0,
+            3.3
+          ],
+          "vbs_topology": "tied",
+          "corner": "tt",
+          "temp_c": 27,
+          "source": "manual",
+          "note": "示例申报（1.8V 器件请自缩 vds/vgs 轨到 1.8/1.5 类）；灯一=申报域必须⊇已采域，越界 pack 响亮拒"
+        }
+      },
+      "p": {
+        "model": "pch_example",
+        "polarity": -1
+      },
+      "vmax": 5.0,
+      "vbs": 0
+    }
+  }
+}
